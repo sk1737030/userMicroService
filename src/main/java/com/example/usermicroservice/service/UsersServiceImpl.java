@@ -20,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UsersServiceImpl implements UserService {
 
+
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -33,9 +34,7 @@ public class UsersServiceImpl implements UserService {
         userEntity.setEncryptedPwd(passwordEncoder.encode(userDto.getPwd()));
         userRepository.save(userEntity);
 
-        UserDto responseUserDto = mapper.map(userEntity, UserDto.class);
-
-        return responseUserDto;
+        return mapper.map(userEntity, UserDto.class);
     }
 
     @Override
@@ -43,10 +42,10 @@ public class UsersServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByUserId(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
-
         List<ResponseOrder> orders = new ArrayList<>();
         userDto.setOrders(orders);
-        return null;
+
+        return userDto;
     }
 
     @Override
@@ -63,8 +62,16 @@ public class UsersServiceImpl implements UserService {
     }
 
     @Override
+    public UserDto getUserDetailsByEmail(String email) {
+        UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("UserNot Found 입니다."));
+        return new ModelMapper().map(userEntity, UserDto.class);
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity userEntity = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
         return new User(userEntity.getEmail(), userEntity.getEncryptedPwd(), true, true, true, true, new ArrayList<>());
     }
+
+
 }
